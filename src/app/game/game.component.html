@@ -1,0 +1,102 @@
+<!-- 
+    #configForm="ngForm": Crea una referencia local llamada configForm que se asocia al estado del formulario.
+    (ngSubmit)="onSubmit(configForm)" : Asocia el evento de envío del formulario al método onSubmit en el componente, 
+    pasando configForm como argumento que representa el formulario en la plantilla. Añadimos en el html
+    novalidate para evitar que el navegador valide el formulario automáticamente y se encargue Angular de ello es decir,
+
+    [disabled]="!configForm.valid": Deshabilita el botón de envío si el formulario es inválido, 
+    es decir, si alguno de los campos es inválido.
+
+    Dentro de cada input, [(ngModel)]="configuracion.propiedad" establece una vinculacion bidireccional entre el valor del input 
+    y las propiedades de la clase Configuracion que hemos instanciado en game.component.ts.
+
+    Dentro del input, #nombre="ngModel" crea una referencia local llamada nombre que se asocia con una directiva Angular para ese campo específico donde esta.
+    en este caso acceder a la directiva ngModel y verificar su estado individual. 
+    Esta instancia te permite acceder a información del campo, como su valor, estado de validación y métodos para gestionarlo
+    Usamos esta referencia local para mostrar mensajes de error si el campo es inválido y ha sido tocado.
+    nombre.invalid: Indica si el campo es inválido.
+    nombre.touched: Indica si el campo ha sido tocado (es decir, si el usuario ha interactuado con él). 
+    igual para el resto de inputs
+ -->
+<div class="container">
+  <h1 class="text-center">Configuración del Juego</h1>
+  <p class="text-center">Ingresa tus datos y configura el juego</p>
+
+  <form class="row" #configForm="ngForm" (ngSubmit)="onSubmit(configForm)" novalidate>
+    <div class="col-3">
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" name="nombre" 
+        [(ngModel)]="configuracion.nombre" #nombre="ngModel" 
+        [disabled]="juegoIniciado" minlength="2" pattern="^[a-zA-Z]+$" required/>
+      <span *ngIf="nombre.valid && nombre.touched" class="ok">✅</span>
+      <div *ngIf="nombre.invalid && nombre.touched" class="error">
+        <span *ngIf="nombre.errors?.['required']">El nombre no puede estar vacío</span>
+        <span *ngIf="nombre.errors?.['minlength']">Debe tener al menos dos caracteres.</span> 
+        <span *ngIf="nombre.errors?.['pattern']">Solo se permiten letras.</span>
+      </div>
+    </div>
+
+    <div class="col-3">
+      <label for="apellido">Apellido:</label>
+      <input type="text" id="apellido" name="apellido" 
+        [(ngModel)]="configuracion.apellido" #apellido="ngModel" 
+        [disabled]="juegoIniciado" minlength="2" pattern="^[a-zA-Z]+$" required/>
+      <span *ngIf="apellido.valid && apellido.touched" class="ok">✅</span>
+      <div *ngIf="apellido.invalid && apellido.touched" class="error">
+        <span *ngIf="apellido.errors?.['required']">El apellido no puede estar vacío</span>
+        <span *ngIf="apellido.errors?.['minlength']">Debe tener al menos dos caracteres. </span> 
+        <span *ngIf="apellido.errors?.['pattern']">Solo se permiten letras.</span>
+      </div>
+    </div>
+
+    <div class="col-3">
+      <label for="rangoMaximo">Rango Máximo:</label>
+      <input type="number" id="rangoMaximo" name="rangoMaximo" 
+        [(ngModel)]="configuracion.rangoMaximo" #rangoMaximo="ngModel" 
+        [min]="4" [disabled]="juegoIniciado" pattern="^[0-9]+$" required/>
+      <span *ngIf="rangoMaximo.valid && rangoMaximo.touched" class="ok">✅</span>
+      <div *ngIf="rangoMaximo.invalid && rangoMaximo.touched" class="error">
+        El rango máximo debe ser un número, como mínimo 4.
+      </div>
+    </div>
+
+    <div class="col-3">
+      <label for="intentos">Intentos:</label>
+      <input type="number" id="intentos" name="intentos" 
+        [(ngModel)]="configuracion.intentos" #intentos="ngModel"
+        [min]="1" [disabled]="juegoIniciado" pattern="^[0-9]+$" required />
+      <span *ngIf="intentos.valid && intentos.touched" class="ok">✅</span>
+      <div *ngIf="intentos.invalid && intentos.touched" class="error">
+        El número de intentos debe ser un número, de al menos 1.
+      </div>
+    </div>
+
+    <button class="w-25 text-center m-auto mt-2 btn btn-primary" type="submit"
+      [disabled]="configForm.invalid || juegoIniciado">Iniciar Juego</button>
+  </form>
+</div>
+<div *ngIf="juegoIniciado" class="container">
+  <div class="row text-center">
+    <!-- Campo para ingresar el número -->
+    <h1>Adivina el Número</h1>
+    <h2>{{ saludo }}</h2>
+    <h3 class="mt-1 mb-2"><strong [ngStyle]="{color:colorPista}">{{ mensaje }}</strong></h3>
+    <div class="col-12">
+      <h4>Ingresa un número entre 0 y {{configuracion.rangoMaximo}} </h4>
+      <h5>Intentos restantes: {{ intentosRestantes }}</h5>
+      <input type="number" id="numeroIngresado" name="numeroIngresado" [(ngModel)]="numeroIngresado" [min]="0" />
+    <!-- 
+    si hacemos click en el boton enviar se ejecuta el metodo verificarNumero, que compara el numero ingresado con el numero a adivinar
+    si la variable juegoFinalizado es true, se desahabilta el boton de enviar y se muestra un boton para jugar de nuevo
+    -->
+      <button class="btn btn-primary mandar-numero" [disabled]="juegoFinalizado" (click)="verificarNumero()">Enviar</button>
+
+      <div *ngIf="juegoFinalizado">
+        <button type="button" class="btn btn-primary" (click)="iniciarJuego()">Jugar de nuevo</button>
+        <br><br>
+        <button type="button" class="btn btn-primary" (click)="reiniciarJuego()">Reiniciar configurar Juego</button>
+        <!-- <a href="/">Cerrar Juego</a> -->
+      </div>
+    </div>
+  </div>
+</div>
